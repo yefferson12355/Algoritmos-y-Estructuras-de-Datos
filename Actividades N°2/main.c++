@@ -5,7 +5,7 @@
 // Incluye la biblioteca para funciones de tiempo
 #include <ctime>
 // Incluye la biblioteca para funciones generales (rand, srand)
-#include <cstdlib>
+#include <cstdlib>  
 
 // Usa el espacio de nombres estándar para evitar std::
 using namespace std;
