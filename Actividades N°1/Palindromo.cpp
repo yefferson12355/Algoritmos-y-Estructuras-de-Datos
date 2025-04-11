@@ -1,6 +1,7 @@
 #include<iostream>
 using namespace std;
-
+/*Diseñar un algoritmo que determine si una cadena es un palíndromo (sin usar 
+funciones integradas).*/
 int main()
 {
     int precios[]={1,2,3,4,5};
