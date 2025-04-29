@@ -156,7 +156,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR args, int nCmdShow) {
     // Loop principal de mensajes (ventana activa)
     MSG msg = { 0 };
     while (GetMessage(&msg, NULL, 0, 0)) {
-        TranslateMessage(&msg);    // Traducir entrada (teclado)
+        TranslateMessage(&msg);    // Traducir entrada (teclado)    
         DispatchMessage(&msg);     // Enviar mensaje a WindowProcedure
     }
 
