@@ -8,7 +8,7 @@ int main() {
 
     clock_t inicio = clock(); // Marca el inicio del bloque
 
-    // 🧪 Bloque a medir: for con números aleatorios
+    //  Bloque a medir: for con números aleatorios
     for (int i = 0; i < 100; ++i) {
         int a = rand() % 101; // Genera número aleatorio entre 0 y 100
         cout << a << " "; // Imprime el valor de 'a' para usarlo
