@@ -1,39 +1,33 @@
-import time  # Importa el módulo time para medir el tiempo de ejecución
-import random  # Importa random para generar números aleatorios
+import random  # Para generar arreglos aleatorios
+import time    # Para medir el tiempo de ejecución
 
-# Algoritmo Bubble Sort
+# Función de ordenamiento Bubble Sort
 def bubble_sort(arr):
-    n = len(arr)  # Obtiene el tamaño del arreglo (lista)
-    for i in range(n - 1):  # Bucle externo: hace n-1 pasadas
-         # Medir tiempo al inicio de la pasada
-        pasada_inicio = time.time()
-        for j in range(n - i - 1):  # Bucle interno: compara elementos no ordenados
-            if arr[j] > arr[j + 1]:  # Si el actual es mayor que el siguiente
-                arr[j], arr[j + 1] = arr[j + 1], arr[j]  # Intercambia los elementos
-        # Medir tiempo al final de la pasada
-        pasada_fin = time.time()
+    n = len(arr)  # Longitud del arreglo
+    for i in range(n):  # Recorrido de n veces
+        for j in range(n - i - 1):  # Comparar elementos adyacentes
+            if arr[j] > arr[j + 1]:  # Si están desordenados
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]  # Intercambiarlos
+        if i < 5:  # Solo mostrar las primeras 5 iteraciones
+            print(f"Iteración {i + 1}: {arr[:10]}...")  # Mostrar primeros 10 elementos
 
-        # Mostrar estado y duración de la pasada
-        print(f"Pasada {i + 1}: {arr} - Duración: {pasada_fin - pasada_inicio:.6f} segundos")
-
-# Función para probar Bubble Sort con un arreglo y medir su tiempo
+# Función para medir tiempo y mostrar resultados
 def probar_bubble_sort(nombre, arreglo):
-    copia = arreglo.copy()  # Crea una copia para no modificar el arreglo original
-    inicio = time.time()  # Marca el inicio de la ejecución
-    bubble_sort(copia)  # Aplica el algoritmo de ordenamiento
-    fin = time.time()  # Marca el final
-    print(f"{nombre} - Tiempo: {fin - inicio:.6f} segundos")  # Muestra el tiempo tomado
+    print(f"\n--- {nombre.upper()} ---")  # Título
+    copia = arreglo.copy()  # Copiar arreglo para no modificar el original
+    inicio = time.time()  # Tiempo antes de ordenar
+    bubble_sort(copia)  # Ejecutar el algoritmo
+    fin = time.time()  # Tiempo después de ordenar
+    print(f"{nombre} - Tiempo: {fin - inicio:.6f} segundos")  # Mostrar tiempo
 
-# 1. Lista de 1000 números aleatorios entre 1 y 10000
-aleatorio = [random.randint(1, 10000) for _ in range(1000)]
+# Crear tres tipos de arreglos
+n = 1000
+aleatorio = random.sample(range(n), n)  # Aleatorio sin repetición
+ordenado = list(range(n))  # Arreglo ya ordenado
+inverso = list(range(n, 0, -1))  # Arreglo en orden descendente
 
-# 2. Lista ordenada de menor a mayor (mejor caso para algunos algoritmos)
-ordenado = sorted(aleatorio)  # 'sorted()' es una función de Python que devuelve una nueva lista ordenada
-
-# 3. Lista ordenada de mayor a menor (peor caso para Bubble Sort, por ejemplo)
-inverso = sorted(aleatorio, reverse=True)  # Ordena al revés con reverse=True
-
-# Ejecuta la prueba con los tres tipos de lista
+# Ejecutar pruebas
+print("Bubble Sort:")
 probar_bubble_sort("Aleatorio", aleatorio)
 probar_bubble_sort("Ordenado", ordenado)
 probar_bubble_sort("Inverso", inverso)

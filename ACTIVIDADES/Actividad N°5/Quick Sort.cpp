@@ -1,29 +1,85 @@
-/*Quick Sort: Algoritmo eficiente basado en divide y vencerás.
- Elige un pivote, reordena elementos menores y mayores, y aplica recursión.
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <chrono>
+#include <random>
+#include <string>
 
-*/
-#include <vector>  // Para std::vector
-#include <algorithm> // Para std::swap
+// Merge Sort recursivo con impresión de los primeros niveles
+void merge_sort(std::vector<int>& arr, int nivel = 0) {
+    if (arr.size() > 1) {
+        int mid = arr.size() / 2;
+        std::vector<int> L(arr.begin(), arr.begin() + mid);
+        std::vector<int> R(arr.begin() + mid, arr.end());
 
-// Reorganiza el vector y devuelve la posición del pivote
-int partition(std::vector<int>& arr, int low, int high) {
-    int pivot = arr[high];  // Elegir último elemento como pivote
-    int i = low - 1;  // Índice de menor elemento
+        merge_sort(L, nivel + 1);
+        merge_sort(R, nivel + 1);
 
-    for (int j = low; j < high; ++j) {
-        if (arr[j] < pivot) {
-            std::swap(arr[++i], arr[j]);  // Intercambiar si es menor al pivote
+        int i = 0, j = 0, k = 0;
+
+        // Mezclar subarreglos ordenados
+        while (i < L.size() && j < R.size()) {
+            if (L[i] < R[j]) {
+                arr[k++] = L[i++];
+            } else {
+                arr[k++] = R[j++];
+            }
+        }
+
+        // Copiar lo que queda de L (si hay)
+        while (i < L.size()) {
+            arr[k++] = L[i++];
+        }
+
+        // Copiar lo que queda de R (si hay)
+        while (j < R.size()) {
+            arr[k++] = R[j++];
+        }
+
+        // Mostrar las fusiones de los primeros 3 niveles
+        if (nivel < 3) {
+            std::cout << "Fusion nivel " << nivel << ": ";
+            for (size_t m = 0; m < std::min(arr.size(), size_t(10)); ++m) {
+                std::cout << arr[m] << " ";
+            }
+            std::cout << "...\n";
         }
     }
-    std::swap(arr[i + 1], arr[high]);  // Colocar pivote en su lugar
-    return i + 1;
 }
 
-// Ordena el vector usando Quick Sort
-void quickSort(std::vector<int>& arr, int low, int high) {
-    if (low < high) {
-        int pi = partition(arr, low, high);  // Partición
-        quickSort(arr, low, pi - 1);  // Ordenar izquierda
-        quickSort(arr, pi + 1, high);  // Ordenar derecha
-    }
+// Función para probar el algoritmo y medir tiempo
+void probar_merge_sort(const std::string& nombre, const std::vector<int>& arreglo) {
+    std::cout << "\n--- " << nombre << " ---\n";
+    std::vector<int> copia = arreglo; // Copia del arreglo original
+    auto inicio = std::chrono::high_resolution_clock::now();
+    merge_sort(copia);
+    auto fin = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duracion = fin - inicio;
+    std::cout << nombre << " - Tiempo: " << duracion.count() << " segundos\n";
+}
+
+int main() {
+    const int n = 1000;
+
+    // Generar arreglo aleatorio
+    std::vector<int> aleatorio(n);
+    for (int i = 0; i < n; ++i) aleatorio[i] = i;
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(aleatorio.begin(), aleatorio.end(), g);
+
+    // Arreglo ordenado
+    std::vector<int> ordenado(n);
+    for (int i = 0; i < n; ++i) ordenado[i] = i;
+
+    // Arreglo inverso
+    std::vector<int> inverso(n);
+    for (int i = 0; i < n; ++i) inverso[i] = n - i;
+
+    std::cout << "Merge Sort:\n";
+    probar_merge_sort("Aleatorio", aleatorio);
+    probar_merge_sort("Ordenado", ordenado);
+    probar_merge_sort("Inverso", inverso);
+
+    return 0;
 }
