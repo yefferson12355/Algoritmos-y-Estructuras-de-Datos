@@ -1,50 +1,40 @@
 import random
 import time
 
-# Algoritmo Merge Sort recursivo
-def merge_sort(arr, nivel=0):
-    if len(arr) > 1:
-        mid = len(arr) // 2  # Punto medio
-        L = arr[:mid]  # Subarreglo izquierdo
-        R = arr[mid:]  # Subarreglo derecho
+# Algoritmo Quick Sort con pivote aleatorio
+def quick_sort(arr, low, high, nivel=0):
+    if low < high:
+        pi = partition(arr, low, high)
 
-        merge_sort(L, nivel + 1)  # Ordenar mitad izquierda
-        merge_sort(R, nivel + 1)  # Ordenar mitad derecha
+        if nivel < 3:
+            print(f"Partición nivel {nivel}: {arr[low:high+1][:10]}...")
 
-        i = j = k = 0  # Índices para L, R y arr
+        quick_sort(arr, low, pi - 1, nivel + 1)
+        quick_sort(arr, pi + 1, high, nivel + 1)
 
-        # Mezclar los elementos ordenados
-        while i < len(L) and j < len(R):
-            if L[i] < R[j]:
-                arr[k] = L[i]
-                i += 1
-            else:
-                arr[k] = R[j]
-                j += 1
-            k += 1
+# Partición con pivote aleatorio
+def partition(arr, low, high):
+    # Elegir índice aleatorio como pivote
+    pivot_index = random.randint(low, high)
+    arr[pivot_index], arr[high] = arr[high], arr[pivot_index]  # Mover pivote al final
 
-        # Copiar elementos restantes de L (si hay)
-        while i < len(L):
-            arr[k] = L[i]
+    pivot = arr[high]
+    i = low - 1
+
+    for j in range(low, high):
+        if arr[j] <= pivot:
             i += 1
-            k += 1
+            arr[i], arr[j] = arr[j], arr[i]
 
-        # Copiar elementos restantes de R (si hay)
-        while j < len(R):
-            arr[k] = R[j]
-            j += 1
-            k += 1
-
-        # Mostrar las fusiones de los primeros 3 ejemplos
-        if nivel < 3:  # Mostrar hasta 3 niveles de fusión
-            print(f"Fusión nivel {nivel}: {arr[:10]}...")
+    arr[i + 1], arr[high] = arr[high], arr[i + 1]
+    return i + 1
 
 # Medir tiempo y mostrar
-def probar_merge_sort(nombre, arreglo):
+def probar_quick_sort(nombre, arreglo):
     print(f"\n--- {nombre.upper()} ---")
     copia = arreglo.copy()
     inicio = time.time()
-    merge_sort(copia)
+    quick_sort(copia, 0, len(copia) - 1)
     fin = time.time()
     print(f"{nombre} - Tiempo: {fin - inicio:.6f} segundos")
 
@@ -52,10 +42,10 @@ def probar_merge_sort(nombre, arreglo):
 n = 1000
 aleatorio = random.sample(range(n), n)
 ordenado = list(range(n))
-inverso = list(range(n, 0, -1))
+inverso = list(range(n - 1, -1, -1))
 
 # Ejecutar
-print("Merge Sort:")
-probar_merge_sort("Aleatorio", aleatorio)
-probar_merge_sort("Ordenado", ordenado)
-probar_merge_sort("Inverso", inverso)
+print("Quick Sort:")
+probar_quick_sort("Aleatorio", aleatorio)
+probar_quick_sort("Ordenado", ordenado)
+probar_quick_sort("Inverso", inverso)

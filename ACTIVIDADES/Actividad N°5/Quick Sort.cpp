@@ -1,85 +1,93 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <cstdlib>
+#include <ctime>
 #include <chrono>
 #include <random>
-#include <string>
 
-// Merge Sort recursivo con impresión de los primeros niveles
-void merge_sort(std::vector<int>& arr, int nivel = 0) {
-    if (arr.size() > 1) {
-        int mid = arr.size() / 2;
-        std::vector<int> L(arr.begin(), arr.begin() + mid);
-        std::vector<int> R(arr.begin() + mid, arr.end());
+using namespace std;
+using namespace std::chrono;
 
-        merge_sort(L, nivel + 1);
-        merge_sort(R, nivel + 1);
+// Mostrar los primeros 10 elementos del segmento [low, high]
+void mostrarParcial(const vector<int>& arr, int low, int high) {
+    int limite = min(10, high - low + 1);
+    cout << "[ ";
+    for (int i = 0; i < limite; ++i) {
+        cout << arr[low + i] << " ";
+    }
+    cout << (high - low + 1 > 10 ? "... " : "") << "]";
+}
 
-        int i = 0, j = 0, k = 0;
+// Partición aleatoria
+int partition(vector<int>& arr, int low, int high) {
+    int pivotIndex = low + rand() % (high - low + 1);
+    swap(arr[pivotIndex], arr[high]);
+    int pivot = arr[high];
+    int i = low - 1;
 
-        // Mezclar subarreglos ordenados
-        while (i < L.size() && j < R.size()) {
-            if (L[i] < R[j]) {
-                arr[k++] = L[i++];
-            } else {
-                arr[k++] = R[j++];
-            }
+    for (int j = low; j < high; ++j) {
+        if (arr[j] <= pivot) {
+            ++i;
+            swap(arr[i], arr[j]);
         }
+    }
+    swap(arr[i + 1], arr[high]);
+    return i + 1;
+}
 
-        // Copiar lo que queda de L (si hay)
-        while (i < L.size()) {
-            arr[k++] = L[i++];
-        }
+// QuickSort con control de profundidad
+void quickSort(vector<int>& arr, int low, int high, int nivel = 0) {
+    if (low < high) {
+        int pi = partition(arr, low, high);
 
-        // Copiar lo que queda de R (si hay)
-        while (j < R.size()) {
-            arr[k++] = R[j++];
-        }
-
-        // Mostrar las fusiones de los primeros 3 niveles
         if (nivel < 3) {
-            std::cout << "Fusion nivel " << nivel << ": ";
-            for (size_t m = 0; m < std::min(arr.size(), size_t(10)); ++m) {
-                std::cout << arr[m] << " ";
-            }
-            std::cout << "...\n";
+            cout << "Particion nivel " << nivel << ": ";
+            mostrarParcial(arr, low, high);
+            cout << endl;
         }
+
+        quickSort(arr, low, pi - 1, nivel + 1);
+        quickSort(arr, pi + 1, high, nivel + 1);
     }
 }
 
-// Función para probar el algoritmo y medir tiempo
-void probar_merge_sort(const std::string& nombre, const std::vector<int>& arreglo) {
-    std::cout << "\n--- " << nombre << " ---\n";
-    std::vector<int> copia = arreglo; // Copia del arreglo original
-    auto inicio = std::chrono::high_resolution_clock::now();
-    merge_sort(copia);
-    auto fin = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> duracion = fin - inicio;
-    std::cout << nombre << " - Tiempo: " << duracion.count() << " segundos\n";
+// Medir y mostrar tiempo de ejecución
+void probarQuickSort(const string& nombre, const vector<int>& arreglo) {
+    cout << "\n--- " << nombre << " ---" << endl;
+    vector<int> copia = arreglo;
+
+    auto inicio = high_resolution_clock::now();
+    quickSort(copia, 0, copia.size() - 1);
+    auto fin = high_resolution_clock::now();
+
+    auto duracion = duration_cast<microseconds>(fin - inicio);
+    cout << nombre << " - Tiempo: " << duracion.count() / 1e6 << " segundos" << endl;
 }
 
 int main() {
-    const int n = 1000;
+    srand(time(0));
+    int n = 1000;
 
-    // Generar arreglo aleatorio
-    std::vector<int> aleatorio(n);
+    // Generar vectores
+    vector<int> aleatorio(n);
     for (int i = 0; i < n; ++i) aleatorio[i] = i;
-    std::random_device rd;
-    std::mt19937 g(rd());
-    std::shuffle(aleatorio.begin(), aleatorio.end(), g);
 
-    // Arreglo ordenado
-    std::vector<int> ordenado(n);
+    // Barajar aleatorio
+    random_device rd;
+    mt19937 g(rd());
+    shuffle(aleatorio.begin(), aleatorio.end(), g);
+
+    vector<int> ordenado(n);
     for (int i = 0; i < n; ++i) ordenado[i] = i;
 
-    // Arreglo inverso
-    std::vector<int> inverso(n);
-    for (int i = 0; i < n; ++i) inverso[i] = n - i;
+    vector<int> inverso(n);
+    for (int i = 0; i < n; ++i) inverso[i] = n - i - 1;
 
-    std::cout << "Merge Sort:\n";
-    probar_merge_sort("Aleatorio", aleatorio);
-    probar_merge_sort("Ordenado", ordenado);
-    probar_merge_sort("Inverso", inverso);
+    cout << "Quick Sort:\n";
+    probarQuickSort("Aleatorio", aleatorio);
+    probarQuickSort("Ordenado", ordenado);
+    probarQuickSort("Inverso", inverso);
 
     return 0;
 }
