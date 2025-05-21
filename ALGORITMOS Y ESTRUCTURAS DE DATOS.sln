@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ReconociemientoDeSeñas", "ReconociemientoDeSeñas", "{163863DF-0930-1E4B-4B8A-4BF2A62A8CED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "app", "ReconociemientoDeSeñas\app\app.csproj", "{AC188156-2D4F-C038-EA2E-E22886D6D44C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AC188156-2D4F-C038-EA2E-E22886D6D44C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC188156-2D4F-C038-EA2E-E22886D6D44C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC188156-2D4F-C038-EA2E-E22886D6D44C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC188156-2D4F-C038-EA2E-E22886D6D44C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AC188156-2D4F-C038-EA2E-E22886D6D44C} = {163863DF-0930-1E4B-4B8A-4BF2A62A8CED}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AA6A4D20-7FE8-403C-9687-5C7200962DC2}
+	EndGlobalSection
+EndGlobal
