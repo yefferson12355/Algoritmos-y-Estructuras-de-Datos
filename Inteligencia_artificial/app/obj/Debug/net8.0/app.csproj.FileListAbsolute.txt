@@ -1,0 +1,15 @@
+D:\UNIVERSIDAD\4 Semestre\ALGORITMOS Y ESTRUCTURAS DE DATOS\ReconociemientoDeSeñas\app\obj\Debug\net8.0\app.GeneratedMSBuildEditorConfig.editorconfig
+D:\UNIVERSIDAD\4 Semestre\ALGORITMOS Y ESTRUCTURAS DE DATOS\ReconociemientoDeSeñas\app\obj\Debug\net8.0\app.AssemblyInfoInputs.cache
+D:\UNIVERSIDAD\4 Semestre\ALGORITMOS Y ESTRUCTURAS DE DATOS\ReconociemientoDeSeñas\app\obj\Debug\net8.0\app.AssemblyInfo.cs
+D:\UNIVERSIDAD\4 Semestre\ALGORITMOS Y ESTRUCTURAS DE DATOS\ReconociemientoDeSeñas\app\obj\Debug\net8.0\app.csproj.CoreCompileInputs.cache
+D:\UNIVERSIDAD\4 Semestre\ALGORITMOS Y ESTRUCTURAS DE DATOS\ReconociemientoDeSeñas\app\obj\Debug\net8.0\app.sourcelink.json
+D:\UNIVERSIDAD\4 Semestre\ALGORITMOS Y ESTRUCTURAS DE DATOS\ReconociemientoDeSeñas\app\bin\Debug\net8.0\app.exe
+D:\UNIVERSIDAD\4 Semestre\ALGORITMOS Y ESTRUCTURAS DE DATOS\ReconociemientoDeSeñas\app\bin\Debug\net8.0\app.deps.json
+D:\UNIVERSIDAD\4 Semestre\ALGORITMOS Y ESTRUCTURAS DE DATOS\ReconociemientoDeSeñas\app\bin\Debug\net8.0\app.runtimeconfig.json
+D:\UNIVERSIDAD\4 Semestre\ALGORITMOS Y ESTRUCTURAS DE DATOS\ReconociemientoDeSeñas\app\bin\Debug\net8.0\app.dll
+D:\UNIVERSIDAD\4 Semestre\ALGORITMOS Y ESTRUCTURAS DE DATOS\ReconociemientoDeSeñas\app\bin\Debug\net8.0\app.pdb
+D:\UNIVERSIDAD\4 Semestre\ALGORITMOS Y ESTRUCTURAS DE DATOS\ReconociemientoDeSeñas\app\obj\Debug\net8.0\app.dll
+D:\UNIVERSIDAD\4 Semestre\ALGORITMOS Y ESTRUCTURAS DE DATOS\ReconociemientoDeSeñas\app\obj\Debug\net8.0\refint\app.dll
+D:\UNIVERSIDAD\4 Semestre\ALGORITMOS Y ESTRUCTURAS DE DATOS\ReconociemientoDeSeñas\app\obj\Debug\net8.0\app.pdb
+D:\UNIVERSIDAD\4 Semestre\ALGORITMOS Y ESTRUCTURAS DE DATOS\ReconociemientoDeSeñas\app\obj\Debug\net8.0\app.genruntimeconfig.cache
+D:\UNIVERSIDAD\4 Semestre\ALGORITMOS Y ESTRUCTURAS DE DATOS\ReconociemientoDeSeñas\app\obj\Debug\net8.0\ref\app.dll
