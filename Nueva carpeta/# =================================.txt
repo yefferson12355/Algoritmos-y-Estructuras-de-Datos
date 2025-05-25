@@ -1,0 +1,925 @@
+# ========================================
+# CNN CHEST X-RAY - SCRIPT COMPLETO
+# TODO EN UNA SOLA CELDA PARA EVITAR ERRORES
+# ========================================
+
+import tensorflow as tf
+from tensorflow import keras
+from keras.models import Sequential
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import os
+from pathlib import Path
+from sklearn.model_selection import train_test_split
+
+print("🚀 CNN CHEST X-RAY - SCRIPT COMPLETO")
+print("=" * 50)
+
+# Configuración
+IMAGE_SIZE = (150, 150)
+BATCH_SIZE = 32
+EPOCHS = 25
+
+print(f"⚙️ Configuración:")
+print(f"   • Tamaño imagen: {IMAGE_SIZE}")
+print(f"   • Batch size: {BATCH_SIZE}")
+print(f"   • Épocas: {EPOCHS}")
+
+# ========================================
+# PASO 1: CARGAR Y VERIFICAR DATOS
+# ========================================
+
+print(f"\n📊 PASO 1: CARGANDO DATOS")
+print("-" * 40)
+
+# Cargar CSV
+try:
+    df = pd.read_csv("nuestras_imagenes_metadata.csv")
+ print(f"✅ CSV cargado: {len(df):,} imágenes")
+    print(f"📋 Columnas disponibles: {list(df.columns)}")
+except FileNotFoundError:
+    print("❌ No se encontró 'nuestras_imagenes_metadata.csv'")
+    print("💡 Ejecuta primero el notebook de análisis CSV")
+    raise SystemExit("Archivo CSV no encontrado")
+
+# Verificar carpeta de imágenes
+images_path = "extracted_images"
+if not os.path.exists(images_path):
+    print(f"❌ Carpeta no existe: {images_path}")
+    raise SystemExit("Carpeta de imágenes no encontrada")
+
+print(f"✅ Carpeta encontrada: {images_path}")
+
+# ========================================
+# PASO 2: PREPARAR CLASES Y RUTAS
+# ========================================
+
+print(f"\n🏥 PASO 2: PREPARANDO CLASES Y RUTAS")
+print("-" * 40)
+
+# Función de clasificación
+def classify_disease(finding_labels):
+    if pd.isna(finding_labels) or finding_labels == 'No Finding':
+        return 'Normal'
+    elif any(disease in str(finding_labels) for disease in ['Pneumonia', 'Infiltration', 'Consolidation']):
+        return 'Infeccion'
+    elif any(disease in str(finding_labels) for disease in ['Cardiomegaly', 'Edema', 'Effusion']):
+        return 'Cardiaco'
+    else:
+        return 'Normal'
+
+# Crear categorías
+df['Disease_Category'] = df['Finding Labels'].apply(classify_disease)
+
+# Crear rutas completas
+df['full_path'] = df['Image Index'].apply(lambda x: os.path.join(images_path, x))
+
+print(f"📊 Distribución de clases:")
+for category, count in df['Disease_Category'].value_counts().items():
+    percentage = count / len(df) * 100
+    print(f"   • {category}: {count:,} ({percentage:.1f}%)")
+   
+# Verificar que las imágenes existen
+print(f"\n🔍 Verificando rutas:")
+sample_paths = df['full_path'].head(3).tolist()
+for path in sample_paths:
+    exists = os.path.exists(path)
+    print(f"   • {os.path.basename(path)}: {'✅' if exists else '❌'}")
+
+# Filtrar solo imágenes existentes
+existing_mask = df['full_path'].apply(os.path.exists)
+df_clean = df[existing_mask].copy()
+
+print(f"✅ Imágenes verificadas: {len(df_clean):,} de {len(df):,}")
+
+if len(df_clean) < 100:
+    print(f"❌ Muy pocas imágenes para entrenar (mínimo 100)")
+    raise SystemExit("Insuficientes imágenes para entrenamiento")
+
+# ========================================
+# PASO 3: DIVIDIR DATOS
+# ========================================
+
+print(f"\n🔄 PASO 3: DIVIDIENDO DATOS")
+print("-" * 40)
+
+# Dividir en entrenamiento y validación
+train_df, val_df = train_test_split(
+    df_clean, 
+    test_size=0.2, 
+    random_state=42,
+    stratify=df_clean['Disease_Category']
+)
+
+print(f"📊 División:")
+print(f"   • Entrenamiento: {len(train_df):,}")
+print(f"   • Validación: {len(val_df):,}")
+# Verificar que ambos DataFrames tienen la columna full_path
+print(f"📋 Columnas en train_df: {list(train_df.columns)}")
+print(f"📋 Columnas en val_df: {list(val_df.columns)}")
+
+# ========================================
+# PASO 4: CREAR GENERADORES
+# ========================================
+
+print(f"\n🔄 PASO 4: CREANDO GENERADORES")
+print("-" * 40)
+
+# Generadores de datos
+train_datagen = ImageDataGenerator(
+    rescale=1./255,
+    rotation_range=20,
+    width_shift_range=0.2,
+    height_shift_range=0.2,
+    shear_range=0.2,
+    zoom_range=0.2,
+    horizontal_flip=True,
+    fill_mode='nearest'
+)
+
+val_datagen = ImageDataGenerator(rescale=1./255)
+
+# Crear generadores
+print("🔄 Creando generador de entrenamiento...")
+train_generator = train_datagen.flow_from_dataframe(
+    dataframe=train_df,
+    x_col='full_path',
+    y_col='Disease_Category',
+    target_size=IMAGE_SIZE,
+    batch_size=BATCH_SIZE,
+    class_mode='categorical',
+    shuffle=True
+)
+
+print("🔄 Creando generador de validación...")
+val_generator = val_datagen.flow_from_dataframe(
+    dataframe=val_df,
+    x_col='full_path',
+    y_col='Disease_Category',
+    target_size=IMAGE_SIZE,
+    batch_size=BATCH_SIZE,
+    class_mode='categorical',
+    shuffle=False
+)
+
+print(f"✅ Generadores creados exitosamente:")
+print(f"   • Training batches: {len(train_generator)}")
+print(f"   • Validation batches: {len(val_generator)}")
+print(f"   • Clases encontradas: {train_generator.class_indices}")
+# ========================================
+# PASO 5: CREAR MODELO
+# ========================================
+
+print(f"\n🧠 PASO 5: CREANDO MODELO CNN")
+print("-" * 40)
+
+model = Sequential([
+    # Primera capa convolucional
+    Conv2D(32, (3, 3), activation='relu', input_shape=(IMAGE_SIZE[0], IMAGE_SIZE[1], 3)),
+    MaxPooling2D((2, 2)),
+    
+    # Segunda capa convolucional
+    Conv2D(64, (3, 3), activation='relu'),
+    MaxPooling2D((2, 2)),
+    
+    # Tercera capa convolucional
+    Conv2D(128, (3, 3), activation='relu'),
+    MaxPooling2D((2, 2)),
+    
+    # Capas densas
+    Flatten(),
+    Dense(128, activation='relu'),
+    Dropout(0.5),
+    Dense(3, activation='softmax')  # 3 clases: Normal, Infeccion, Cardiaco
+])# Compilar modelo
+model.compile(
+    optimizer='adam',
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+print(f"✅ Modelo CNN creado:")
+model.summary()
+
+# ========================================
+# PASO 6: ENTRENAR MODELO
+# ========================================
+
+print(f"\n🚀 PASO 6: ENTRENANDO MODELO")
+print("=" * 50)
+
+# Callbacks útiles
+callbacks = [
+    keras.callbacks.ModelCheckpoint(
+        'best_chest_xray_model.h5',
+        monitor='val_accuracy',
+        save_best_only=True,
+        mode='max',
+        verbose=1
+    ),
+    keras.callbacks.ReduceLROnPlateau(
+        monitor='val_loss',
+        factor=0.5,
+        patience=3,
+        min_lr=1e-7,
+        verbose=1
+    ),
+    keras.callbacks.EarlyStopping(
+        monitor='val_loss',
+        patience=5,
+        restore_best_weights=True,
+        verbose=1
+    )
+]
+# ¡ENTRENAR!
+print(f"🔥 Comenzando entrenamiento por {EPOCHS} épocas...")
+history = model.fit(
+    train_generator,
+    steps_per_epoch=len(train_generator),
+    epochs=EPOCHS,
+    validation_data=val_generator,
+    validation_steps=len(val_generator),
+    callbacks=callbacks,
+    verbose=1
+)
+
+print(f"🎉 ¡ENTRENAMIENTO COMPLETADO!")
+
+# Guardar modelo final
+model.save('chest_xray_final_model.h5')
+print(f"💾 Modelo guardado: chest_xray_final_model.h5")
+
+# ========================================
+# PASO 7: VISUALIZAR RESULTADOS
+# ========================================
+
+print(f"\n📈 PASO 7: VISUALIZANDO RESULTADOS")
+print("-" * 40)
+
+# Crear gráficos de entrenamiento
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))
+
+# Gráfico de pérdida
+ax1.plot(history.history['loss'], 'b-', label='Entrenamiento', linewidth=2)
+ax1.plot(history.history['val_loss'], 'r-', label='Validación', linewidth=2)
+ax1.set_title('Pérdida durante el Entrenamiento', fontsize=14)
+ax1.set_xlabel('Época')
+ax1.set_ylabel('Pérdida')
+ax1.legend()
+ax1.grid(True, alpha=0.3)
+# Gráfico de precisión
+ax2.plot(history.history['accuracy'], 'b-', label='Entrenamiento', linewidth=2)
+ax2.plot(history.history['val_accuracy'], 'r-', label='Validación', linewidth=2)
+ax2.set_title('Precisión durante el Entrenamiento', fontsize=14)
+ax2.set_xlabel('Época')
+ax2.set_ylabel('Precisión')
+ax2.legend()
+ax2.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.savefig('chest_xray_training_results.png', dpi=300, bbox_inches='tight')
+plt.show()
+
+# Mostrar estadísticas finales
+best_val_acc = max(history.history['val_accuracy'])
+best_epoch = history.history['val_accuracy'].index(best_val_acc) + 1
+final_train_acc = history.history['accuracy'][-1]
+final_val_acc = history.history['val_accuracy'][-1]
+
+print(f"\n🏆 RESULTADOS FINALES:")
+print(f"   • Mejor época: {best_epoch}")
+print(f"   • Mejor precisión validación: {best_val_acc:.4f} ({best_val_acc*100:.2f}%)")
+print(f"   • Precisión final entrenamiento: {final_train_acc:.4f} ({final_train_acc*100:.2f}%)")
+print(f"   • Precisión final validación: {final_val_acc:.4f} ({final_val_acc*100:.2f}%)")
+# ========================================
+# PASO 8: FUNCIÓN DE PREDICCIÓN
+# ========================================
+
+def predict_chest_xray(image_path):
+    """Predecir enfermedad en una imagen de rayos X"""
+    
+    from keras.preprocessing import image
+    
+    # Cargar y procesar imagen
+    test_image = image.load_img(image_path, target_size=IMAGE_SIZE)
+    test_image = image.img_to_array(test_image)
+    test_image = np.expand_dims(test_image, axis=0)
+    test_image = test_image / 255.0  # Normalizar
+    
+    # Realizar predicción
+    prediction = model.predict(test_image, verbose=0)
+  # Mapeo de clases (basado en train_generator.class_indices)
+    class_names = list(train_generator.class_indices.keys())
+    predicted_class_idx = np.argmax(prediction[0])
+    predicted_class = class_names[predicted_class_idx]
+    confidence = prediction[0][predicted_class_idx]
+    
+    print(f"🔍 PREDICCIÓN PARA: {os.path.basename(image_path)}")
+    print(f"   🎯 Clase predicha: {predicted_class}")
+    print(f"   📊 Confianza: {confidence:.2%}")
+    
+    print(f"   📋 Probabilidades detalladas:")
+    for i, (class_name, prob) in enumerate(zip(class_names, prediction[0])):
+        emoji = "🎯" if i == predicted_class_idx else "  "
+        print(f"   {emoji} {class_name}: {prob:.2%}")
+    
+    return predicted_class, confidence
+
+print(f"\n✅ ENTRENAMIENTO COMPLETADO EXITOSAMENTE!")
+print("=" * 50)
+print(f"🎯 ARCHIVOS GENERADOS:")
+print(f"   • best_chest_xray_model.h5 - Mejor modelo")
+print(f"   • chest_xray_final_model.h5 - Modelo final")
+print(f"   • chest_xray_training_results.png - Gráficos")
+
+print(f"\n🛠️ FUNCIÓN DISPONIBLE:")
+print(f"   • predict_chest_xray('ruta/imagen.png')")
+
+print(f"\n🚀 ¡Tu clasificador de radiografías está listo!")
+
+------------------------------------------------
+# ========================================
+# CNN CHEST X-RAY - CÓDIGO LIMPIO Y CORREGIDO
+# ========================================
+
+import tensorflow as tf
+from tensorflow import keras
+from keras.models import Sequential
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import os
+from pathlib import Path
+from sklearn.model_selection import train_test_split
+
+print("🚀 CNN CHEST X-RAY - VERSIÓN CORREGIDA")
+print("=" * 40)
+
+# ========================================
+# 1. CONFIGURACIÓN
+# ========================================
+
+IMAGE_SIZE = (150, 150)
+BATCH_SIZE = 32
+EPOCHS = 25
+
+print(f"⚙️ Configuración:")
+print(f"   • Tamaño imagen: {IMAGE_SIZE}")
+print(f"   • Batch size: {BATCH_SIZE}")
+print(f"   • Épocas: {EPOCHS}")
+
+# ========================================
+# 2. CARGAR DATOS
+# ========================================
+
+print(f"\n📊 CARGANDO DATOS")
+print("-" * 30)
+
+# Cargar CSV
+try:
+    df = pd.read_csv("nuestras_imagenes_metadata.csv")
+    print(f"✅ CSV cargado: {len(df):,} imágenes")
+except FileNotFoundError:
+    print("❌ No se encontró el CSV")
+    df = None
+
+# Encontrar imágenes (basado en tu diagnóstico)
+images_path = "extracted_images"
+if df is not None:
+    if os.path.exists(images_path):
+        print(f"✅ Carpeta encontrada: {images_path}")
+    else:
+        print(f"❌ Carpeta no existe: {images_path}")
+        images_path = None
+
+# ========================================
+# 3. PREPARAR CLASES
+# ========================================
+
+if df is not None:
+    print(f"\n🏥 PREPARANDO CLASES")
+    print("-" * 30)
+    
+    def classify_disease(finding_labels):
+        if pd.isna(finding_labels) or finding_labels == 'No Finding':
+            return 'Normal'
+        elif any(disease in str(finding_labels) for disease in ['Pneumonia', 'Infiltration', 'Consolidation']):
+            return 'Infeccion'
+        elif any(disease in str(finding_labels) for disease in ['Cardiomegaly', 'Edema', 'Effusion']):
+            return 'Cardiaco'
+        else:
+            return 'Normal'
+    
+    df['Disease_Category'] = df['Finding Labels'].apply(classify_disease)
+    
+    print(f"📊 Distribución de clases:")
+    for category, count in df['Disease_Category'].value_counts().items():
+        percentage = count / len(df) * 100
+        print(f"   • {category}: {count:,} ({percentage:.1f}%)")
+
+# ========================================
+# 4. CREAR DATAFRAME CON RUTAS
+# ========================================
+
+if df is not None and images_path is not None:
+    print(f"\n🔄 PREPARANDO RUTAS")
+    print("-" * 30)
+    
+    # Crear rutas completas
+    df['full_path'] = df['Image Index'].apply(lambda x: os.path.join(images_path, x))
+    
+    # Verificar algunas rutas de ejemplo
+    print(f"🔍 Verificando rutas de ejemplo:")
+    sample_paths = df['full_path'].head(3).tolist()
+    for path in sample_paths:
+        exists = os.path.exists(path)
+        print(f"   • {os.path.basename(path)}: {'✅' if exists else '❌'}")
+    
+    # Filtrar solo imágenes que existen
+    existing_mask = df['full_path'].apply(os.path.exists)
+    df_clean = df[existing_mask].copy()
+    
+    print(f"✅ Imágenes verificadas: {len(df_clean):,} de {len(df):,}")
+    
+    if len(df_clean) > 100:  # Mínimo para entrenar
+        print(f"✅ Suficientes imágenes para entrenar!")
+    else:
+        print(f"❌ Muy pocas imágenes encontradas")
+        df_clean = None
+
+# ========================================
+# 5. DIVIDIR DATOS
+# ========================================
+
+if 'df_clean' in locals() and df_clean is not None and len(df_clean) > 100:
+    print(f"\n🔄 DIVIDIENDO DATOS")
+    print("-" * 30)
+    
+    # Dividir en entrenamiento y validación
+    train_df, val_df = train_test_split(
+        df_clean, 
+        test_size=0.2, 
+        random_state=42,
+        stratify=df_clean['Disease_Category']
+    )
+    
+    print(f"📊 División:")
+    print(f"   • Entrenamiento: {len(train_df):,}")
+    print(f"   • Validación: {len(val_df):,}")
+
+# ========================================
+# 6. CONFIGURAR GENERADORES
+# ========================================
+
+if 'train_df' in locals():
+    print(f"\n🔄 CONFIGURANDO GENERADORES")
+    print("-" * 30)
+    
+    # Generador de entrenamiento
+    train_datagen = ImageDataGenerator(
+        rescale=1./255,
+        rotation_range=20,
+        width_shift_range=0.2,
+        height_shift_range=0.2,
+        shear_range=0.2,
+        zoom_range=0.2,
+        horizontal_flip=True,
+        fill_mode='nearest'
+    )
+    
+    # Generador de validación
+    val_datagen = ImageDataGenerator(rescale=1./255)
+    
+    # Crear generadores
+    train_generator = train_datagen.flow_from_dataframe(
+        dataframe=train_df,
+        x_col='full_path',
+        y_col='Disease_Category',
+        target_size=IMAGE_SIZE,
+        batch_size=BATCH_SIZE,
+        class_mode='categorical',
+        shuffle=True
+    )
+    
+    val_generator = val_datagen.flow_from_dataframe(
+        dataframe=val_df,
+        x_col='full_path',
+        y_col='Disease_Category',
+        target_size=IMAGE_SIZE,
+        batch_size=BATCH_SIZE,
+        class_mode='categorical',
+        shuffle=False
+    )
+    
+    print(f"✅ Generadores creados:")
+    print(f"   • Training batches: {len(train_generator)}")
+    print(f"   • Validation batches: {len(val_generator)}")
+    print(f"   • Clases: {train_generator.class_indices}")
+
+# ========================================
+# 7. CREAR MODELO
+# ========================================
+
+if 'train_generator' in locals():
+    print(f"\n🧠 CREANDO MODELO")
+    print("-" * 30)
+    
+    model = Sequential()
+    
+    # Capas convolucionales
+    model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(IMAGE_SIZE[0], IMAGE_SIZE[1], 3)))
+    model.add(MaxPooling2D((2, 2)))
+    
+    model.add(Conv2D(64, (3, 3), activation='relu'))
+    model.add(MaxPooling2D((2, 2)))
+    
+    model.add(Conv2D(128, (3, 3), activation='relu'))
+    model.add(MaxPooling2D((2, 2)))
+    
+    # Capas densas
+    model.add(Flatten())
+    model.add(Dense(128, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(3, activation='softmax'))  # 3 clases
+    
+    # Compilar
+    model.compile(
+        optimizer='adam',   loss='categorical_crossentropy',
+        metrics=['accuracy']
+    )
+    
+    print(f"✅ Modelo creado")
+    model.summary()
+
+# ========================================
+# 8. ENTRENAMIENTO
+# ========================================
+
+if 'model' in locals() and 'train_generator' in locals():
+    print(f"\n🚀 INICIANDO ENTRENAMIENTO")
+    print("-" * 40)
+    
+    # Entrenar modelo
+    history = model.fit(
+        train_generator,
+        steps_per_epoch=len(train_generator),
+        epochs=EPOCHS,
+        validation_data=val_generator,
+        validation_steps=len(val_generator),
+        verbose=1
+    )
+    
+    print(f"🎉 ¡Entrenamiento completado!")
+    
+    # Guardar modelo
+    model.save('chest_xray_model.h5')
+    print(f"💾 Modelo guardado: chest_xray_model.h5")
+
+# ========================================
+# 9. VISUALIZAR RESULTADOS
+# ========================================
+
+if 'history' in locals():
+    print(f"\n📈 CREANDO GRÁFICOS")
+    print("-" * 30)
+    
+    # Crear gráficos
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+    
+    # Pérdida
+    ax1.plot(history.history['loss'], label='Entrenamiento')
+    ax1.plot(history.history['val_loss'], label='Validación')
+    ax1.set_title('Pérdida durante el entrenamiento')
+    ax1.set_xlabel('Época')
+    ax1.set_ylabel('Pérdida')
+    ax1.legend()
+    ax1.grid(True)
+    
+    # Precisión
+    ax2.plot(history.history['accuracy'], label='Entrenamiento')
+    ax2.plot(history.history['val_accuracy'], label='Validación')
+    ax2.set_title('Precisión durante el entrenamiento')
+    ax2.set_xlabel('Época')
+    ax2.set_ylabel('Precisión')
+    ax2.legend()
+    ax2.grid(True)
+    
+    plt.tight_layout()
+    plt.savefig('training_results.png', dpi=300)
+    plt.show()
+    
+    # Mostrar mejores resultados
+    best_val_acc = max(history.history['val_accuracy'])
+    best_epoch = history.history['val_accuracy'].index(best_val_acc) + 1
+    
+    print(f"🏆 MEJORES RESULTADOS:")
+    print(f"   • Mejor época: {best_epoch}")
+    print(f"   • Mejor Val Accuracy: {best_val_acc:.4f}")
+    print(f"   • Train Accuracy final: {history.history['accuracy'][-1]:.4f}")
+
+# ========================================
+# 10. FUNCIÓN DE PREDICCIÓN
+# ========================================
+
+def predict_chest_xray(image_path):
+    """Predecir enfermedad en una imagen"""
+    
+    if 'model' not in globals():
+        print("❌ Modelo no entrenado aún")
+        return
+    
+    from keras.preprocessing import image
+    
+    # Cargar imagen
+    test_image = image.load_img(image_path, target_size=IMAGE_SIZE)
+    test_image = image.img_to_array(test_image)
+    test_image = np.expand_dims(test_image, axis=0)
+    test_image = test_image / 255.0
+    
+    # Predecir
+    result = model.predict(test_image)
+    
+    # Clases
+    class_names = ['Cardiaco', 'Infeccion', 'Normal']
+    predicted_class = np.argmax(result[0])
+    confidence = result[0][predicted_class]
+    
+    print(f"🔍 Predicción para: {os.path.basename(image_path)}")
+    print(f"   • Clase: {class_names[predicted_class]}")
+    print(f"   • Confianza: {confidence:.2%}")
+        # Mostrar todas las probabilidades
+    print(f"   • Probabilidades:")
+    for i, (class_name, prob) in enumerate(zip(class_names, result[0])):
+        print(f"     - {class_name}: {prob:.2%}")
+
+print(f"\n✅ CÓDIGO COMPLETADO")
+print("=" * 40)
+print("🛠️ Función disponible:")
+print("   • predict_chest_xray('ruta/imagen.png')")
+
+if 'history' not in locals():
+    print("\n💡 Para completar el entrenamiento, asegúrate de tener:")
+    print("   • El archivo 'nuestras_imagenes_metadata.csv'")
+    print("   • La carpeta 'extracted_images' con las imágenes PNG")
+
+# ========================================
+# COMPLETANDO TU PIPELINE CNN
+# Solo agregamos lo que te falta
+# ========================================
+
+# Tus imports (ya los tienes)
+import tensorflow as tf
+from tensorflow import keras
+from keras.models import Sequential
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+import pandas as pd
+import matplotlib.pyplot as plt
+
+print("🚀 COMPLETANDO TU CNN PIPELINE")
+print("=" * 40)
+
+# ========================================
+# PASO 1-4: YA LOS TIENES ✅
+# Tu modelo CNN ya está creado y compilado
+# ========================================
+
+# Configuración (la que ya tienes)
+IMAGE_SIZE = 64  # o el que estés usando
+BATCH_SIZE = 32
+EPOCHS = 10
+
+print("✅ Pasos 1-4 ya completados (modelo creado)")
+
+# ========================================
+# LO QUE TE FALTA: CARGAR Y PREPARAR DATOS REALES
+# ========================================
+
+print("\n📊 CARGANDO TUS DATOS REALES")
+print("-" * 40)
+
+# Cargar el CSV que ya tienes
+try:
+    df = pd.read_csv("nuestras_imagenes_metadata.csv")
+    print(f"✅ CSV cargado: {len(df):,} imágenes")
+    
+    # Clasificar en 3 categorías simples
+    def classify_simple(finding_labels):
+        if pd.isna(finding_labels) or finding_labels == 'No Finding':
+            return 'Normal'
+        elif 'Pneumonia' in str(finding_labels) or 'Infiltration' in str(finding_labels):
+            return 'Infeccion'
+        elif 'Cardiomegaly' in str(finding_labels) or 'Edema' in str(finding_labels):
+            return 'Cardiaco'
+        else:
+            return 'Normal'
+    
+    df['Disease_Category'] = df['Finding Labels'].apply(classify_simple)
+    df['full_path'] = df['Image Index'].apply(lambda x: f"extracted_images/{x}")
+    
+    # Solo imágenes que existen
+    import os
+    existing_mask = df['full_path'].apply(os.path.exists)
+    df_clean = df[existing_mask].copy()
+    
+    print(f"✅ Imágenes verificadas: {len(df_clean):,}")
+    print(f"📊 Clases: {df_clean['Disease_Category'].value_counts().to_dict()}")
+    
+except FileNotFoundError:
+    print("❌ CSV no encontrado - usa datos de ejemplo")
+    # Código para crear datos de ejemplo si no tienes el CSV
+
+# ========================================
+# LO QUE TE FALTA: CONFIGURAR TUS GENERADORES
+# ========================================
+
+print(f"\n🔄 CONFIGURANDO GENERADORES CON TUS DATOS")
+print("-" * 40)
+
+if 'df_clean' in locals() and len(df_clean) > 100:
+    
+    # Dividir datos
+    from sklearn.model_selection import train_test_split
+    train_df, val_df = train_test_split(df_clean, test_size=0.2, random_state=42)
+    
+    # Tus generadores (ya los tienes, solo los aplicamos a datos reales)
+    train_datagen = ImageDataGenerator(
+        rescale=1./255,
+        rotation_range=20,
+        width_shift_range=0.2,
+        height_shift_range=0.2,
+        horizontal_flip=True,
+        fill_mode='nearest'
+    )
+    
+    val_datagen = ImageDataGenerator(rescale=1./255)
+    
+    # Crear generadores con tus datos reales
+    train_generator = train_datagen.flow_from_dataframe(
+        dataframe=train_df,
+        x_col='full_path',
+        y_col='Disease_Category', 
+        target_size=(IMAGE_SIZE, IMAGE_SIZE),
+        batch_size=BATCH_SIZE,
+        class_mode='categorical',
+        shuffle=True
+    )
+    
+    val_generator = val_datagen.flow_from_dataframe(
+        dataframe=val_df,
+        x_col='full_path',
+        y_col='Disease_Category',
+        target_size=(IMAGE_SIZE, IMAGE_SIZE), 
+        batch_size=BATCH_SIZE,
+        class_mode='categorical',
+        shuffle=False
+    )
+    
+    print(f"✅ Generadores listos:")
+    print(f"   • Training: {len(train_generator)} batches")
+    print(f"   • Validation: {len(val_generator)} batches")
+    print(f"   • Clases encontradas: {train_generator.class_indices}")
+    
+    generators_ready = True
+else:
+    print("❌ No hay suficientes datos para entrenar")
+    generators_ready = False
+
+# ========================================
+# LO QUE TE FALTA: ENTRENAR EL MODELO
+# ========================================
+
+if generators_ready:
+    print(f"\n🚀 ENTRENANDO TU MODELO CNN")
+    print("-" * 40)
+    
+    # Aquí usas tu modelo que ya creaste
+    # classifier.fit(...) - usando el nombre que tienes
+    
+    print("🔥 Comenzando entrenamiento...")
+    
+    # AQUÍ VA TU LÍNEA DE ENTRENAMIENTO
+    history = classifier.fit(  # ← Usa el nombre de tu modelo
+        train_generator,
+        steps_per_epoch=len(train_generator),
+        epochs=EPOCHS,
+        validation_data=val_generator,
+        validation_steps=len(val_generator),
+        verbose=1
+    )
+    
+    print("🎉 ¡Entrenamiento completado!")
+    
+    # Guardar modelo
+    classifier.save('mi_modelo_radiografias.h5')
+    print("💾 Modelo guardado como: mi_modelo_radiografias.h5")
+
+# ========================================
+# LO QUE TE FALTA: VISUALIZAR RESULTADOS
+# ========================================
+
+if 'history' in locals():
+    print(f"\n📈 VISUALIZANDO RESULTADOS")
+    print("-" * 40)
+    
+    # Gráficos simples como en tu imagen
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+    
+    # Accuracy
+    ax1.plot(history.history['accuracy'], label='Training')
+    ax1.plot(history.history['val_accuracy'], label='Validation') 
+    ax1.set_title('Accuracy')
+    ax1.set_xlabel('Epochs')
+    ax1.set_ylabel('Accuracy')
+    ax1.legend()
+    ax1.grid(True)
+    
+    # Loss
+    ax2.plot(history.history['loss'], label='Training')
+    ax2.plot(history.history['val_loss'], label='Validation')
+    ax2.set_title('Loss') 
+    ax2.set_xlabel('Epochs')
+    ax2.set_ylabel('Loss')
+    ax2.legend()
+    ax2.grid(True)
+    
+    plt.tight_layout()
+    plt.savefig('resultados_entrenamiento.png')
+    plt.show()
+    
+    # Mostrar mejores resultados
+    best_acc = max(history.history['val_accuracy'])
+    final_acc = history.history['val_accuracy'][-1]
+    
+    print(f"🏆 RESULTADOS:")
+    print(f"   • Mejor accuracy: {best_acc:.3f} ({best_acc*100:.1f}%)")
+    print(f"   • Accuracy final: {final_acc:.3f} ({final_acc*100:.1f}%)")
+
+# ========================================
+# LO QUE TE FALTA: FUNCIÓN DE PREDICCIÓN
+# ========================================
+
+def predecir_radiografia(ruta_imagen):
+    """Predecir enfermedad en una radiografía"""
+    
+    from keras.preprocessing import image
+    import numpy as np
+    
+    # Cargar imagen
+    img = image.load_img(ruta_imagen, target_size=(IMAGE_SIZE, IMAGE_SIZE))
+    img_array = image.img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0)
+    img_array = img_array / 255.0  # Normalizar
+    
+    # Predecir
+    prediction = classifier.predict(img_array)
+    
+    # Clases (ajusta según tus datos)
+    clases = ['Cardiaco', 'Infeccion', 'Normal']  # Orden alfabético por defecto
+    
+    # Resultado
+    clase_predicha = clases[np.argmax(prediction)]
+    confianza = np.max(prediction)
+    
+    print(f"🔍 Predicción: {clase_predicha}")
+    print(f"📊 Confianza: {confianza:.2%}")
+    
+    return clase_predicha, confianza
+
+print(f"\n✅ PIPELINE COMPLETADO")
+print("=" * 40)
+print("🛠️ Funciones disponibles:")
+print("   • predecir_radiografia('ruta/imagen.png')")
+print("\n🎯 Archivos generados:")  
+print("   • mi_modelo_radiografias.h5")
+print("   • resultados_entrenamiento.png")
+
+# ========================================
+# CÓDIGO MÍNIMO PARA COPIAR (si prefieres)
+# ========================================
+
+codigo_minimo = '''
+# CÓDIGO MÍNIMO PARA AGREGAR A LO QUE YA TIENES:
+
+# 1. Cargar datos
+df = pd.read_csv("nuestras_imagenes_metadata.csv")
+df['Disease_Category'] = df['Finding Labels'].apply(lambda x: 'Normal' if pd.isna(x) else 'Infeccion')
+df['full_path'] = df['Image Index'].apply(lambda x: f"extracted_images/{x}")
+
+# 2. Crear generadores  
+train_generator = train_datagen.flow_from_dataframe(df, 'full_path', 'Disease_Category', (64,64), 32, 'categorical')
+
+# 3. Entrenar
+history = classifier.fit(train_generator, epochs=10)
+
+# 4. Guardar
+classifier.save('modelo.h5')
+'''
+
+print(f"\n📝 CÓDIGO MÍNIMO:")
+print(codigo_minimo)

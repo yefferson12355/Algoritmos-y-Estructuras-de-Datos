@@ -1,11 +1,11 @@
 #include <iostream>
-#include <vector>
-#include <queue>
-#include <limits>
-#include <cstdlib>
+#include <vector>   // Para usar vectores dinámicos
+#include <queue>    // Para la cola de prioridad (priority_queue)
+#include <limits>   // Para obtener valores límite (infinito)
+#include <cstdlib>  // Para números aleatorios (rand, srand)
 #include <ctime>
 #include <chrono>
-#include <unordered_set>
+#include <unordered_set>    // Para conjuntos hash (evitar duplicados)
 
 using namespace std;
 
