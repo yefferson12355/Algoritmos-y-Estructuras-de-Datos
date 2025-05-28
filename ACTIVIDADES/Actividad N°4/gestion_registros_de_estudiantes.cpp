@@ -25,7 +25,7 @@ class Nodo {
      }
 };
 
-// Clase ListaDoble con operaciones básicas
+
 class ListaDoble {
     private:
         Nodo* cabeza;
@@ -44,10 +44,10 @@ class ListaDoble {
      void agregar(string nombre, string correo, string escuela, int anio) 
      {
         Nodo* nuevo = new Nodo(contadorId++, nombre, correo, escuela, anio);
-
+            //1
         if (cabeza == nullptr) {
         cabeza = nuevo;
-        } else {
+        } else {//2
         Nodo* actual = cabeza;
 
         while (actual->siguiente != nullptr) {

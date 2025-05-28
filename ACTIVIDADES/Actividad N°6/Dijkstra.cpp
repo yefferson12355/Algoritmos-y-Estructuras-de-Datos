@@ -26,7 +26,7 @@ vector<vector<pair<int, int>>> generarGrafo(int n, int conexionesPorNodo = 3) {
         }
     }
     return grafo;
-}
+}   
 
 // Algoritmo de Dijkstra utilizando un min-heap (priority_queue con greater<>)
 vector<int> dijkstra(int n, const vector<vector<pair<int, int>>>& grafo, int inicio) {
