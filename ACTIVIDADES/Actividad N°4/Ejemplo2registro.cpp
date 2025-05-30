@@ -13,7 +13,7 @@ struct Estudiante {
     string correo;
     string carrera;
     int anio;
-};
+};  
 
 // Lista global de estudiantes
 vector<Estudiante> lista;

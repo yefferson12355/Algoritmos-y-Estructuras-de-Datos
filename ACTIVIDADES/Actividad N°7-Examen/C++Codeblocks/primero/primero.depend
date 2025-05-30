@@ -1,0 +1,7 @@
+# depslib dependency file v1.0
+1748566381 source:d:\universidad\4 semestre\algoritmos y estructuras de datos\actividades\actividad n°7-examen\c++codeblocks\primero\main.cpp
+	<windows.h>
+	<string>
+	<vector>
+	<sstream>
+
