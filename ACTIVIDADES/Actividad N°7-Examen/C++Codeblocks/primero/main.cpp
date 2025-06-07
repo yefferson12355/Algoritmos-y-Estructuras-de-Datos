@@ -1,13 +1,13 @@
 #include <windows.h>
 #include <string>
-#include <vector>
+#include <vector> //array dinamico.
 #include <sstream>
 using namespace std;
-
+//AVl  , metodo izqueirdista, uphigtj, dowhijw, Tipos de prioridad.
 struct Paciente {
     string nombre;
     string dni;
-    int nivelEmergencia;
+    int nivelEmergencia;//prioridad
     int tiempoAtencion;
 
     Paciente(string n, string d, int nivel, int tiempo)

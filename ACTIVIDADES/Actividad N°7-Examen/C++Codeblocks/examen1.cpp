@@ -20,10 +20,10 @@ private:
     int totalAtendidos = 0;
     int tiempoTotal = 0;
 
-    void subir(int i) {
+    void subir(int i) { //agrega un paciente al heap
         while (i > 0) {
-            int padre = (i - 1) / 2;
-            if (heap[i].nivelEmergencia < heap[padre].nivelEmergencia) {
+            int padre = (i - 1) / 2; // padre del nodo actual
+            if (heap[i].nivelEmergencia < heap[padre].nivelEmergencia) { 
                 swap(heap[i], heap[padre]);
                 i = padre;
             } else break;
@@ -33,13 +33,13 @@ private:
     void bajar(int i) {
         int n = heap.size();
         while (true) {
-            int izq = 2 * i + 1;
-            int der = 2 * i + 2;
+            int izq = 2 * i + 1; // hijo izquierdo
+            int der = 2 * i + 2; // hijo derecho
             int menor = i;
             if (izq < n && heap[izq].nivelEmergencia < heap[menor].nivelEmergencia) menor = izq;
             if (der < n && heap[der].nivelEmergencia < heap[menor].nivelEmergencia) menor = der;
             if (menor != i) {
-                swap(heap[i], heap[menor]);
+                swap(heap[i], heap[menor]);// intercambiar con el hijo menor
                 i = menor;
             } else break;
         }
@@ -52,7 +52,7 @@ public:
     }
 
     void atenderPaciente(HWND hEstado) {
-        if (heap.empty()) {
+        if (heap.empty()) { // si no hay pacientes
             SetWindowText(hEstado, "No hay pacientes para atender.");
             return;
         }

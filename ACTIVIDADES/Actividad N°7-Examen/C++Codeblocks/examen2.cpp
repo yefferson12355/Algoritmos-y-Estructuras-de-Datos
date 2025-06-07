@@ -2,7 +2,7 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <queue>
+#include <queue> // Para BFS
 #include <set>
 
 using namespace std;

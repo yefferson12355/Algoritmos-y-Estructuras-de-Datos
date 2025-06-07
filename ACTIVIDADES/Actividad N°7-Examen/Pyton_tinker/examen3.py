@@ -20,7 +20,7 @@ class HistorialComandos:
         self.rehacer.append(accion)#Agregar al ultimo ,reaccer
         return f"Deshacer accion: {accion}"
 
-    def rehacer_accion(self):xxx
+    def rehacer_accion(self):
         if not self.rehacer:
             return "Nada que rehacer."
         accion = self.rehacer.pop()

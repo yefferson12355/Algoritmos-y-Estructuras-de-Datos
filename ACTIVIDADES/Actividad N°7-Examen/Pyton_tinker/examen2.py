@@ -3,23 +3,23 @@ from tkinter import messagebox
 
 class Grafo:
     def __init__(self):
-        self.adyacencia = {}
+        self.adyacencia = {} #diccionarios
 
     def agregar_conexion(self, a, b):
         self.adyacencia.setdefault(a, []).append(b)
-        self.adyacencia.setdefault(b, []).append(a)
+        self.adyacencia.setdefault(b, []).append(a) #agrega al final
 
     def existe_ruta(self, origen, destino):
-        visitados = set()
+        visitados = set() #sin duplicados
         return self._dfs_existe(origen, destino, visitados)
 
     def _dfs_existe(self, actual, destino, visitados):
-        if actual == destino:
+        if actual == destino:  #llego al destino
             return True
-        visitados.add(actual)
-        for vecino in self.adyacencia.get(actual, []):
+        visitados.add(actual)   #actual visitado
+        for vecino in self.adyacencia.get(actual, []): #otros vecinos
             if vecino not in visitados:
-                if self._dfs_existe(vecino, destino, visitados):
+                if self._dfs_existe(vecino, destino, visitados): # Recursion
                     return True
         return False
 
@@ -33,7 +33,7 @@ class Grafo:
         camino.append(actual)
 
         if actual == destino:
-            rutas.append(list(camino))
+            rutas.append(list(camino))#copia de lista
         else:
             for vecino in self.adyacencia.get(actual, []):
                 if vecino not in visitados:
