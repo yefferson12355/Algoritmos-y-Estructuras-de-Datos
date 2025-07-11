@@ -4,7 +4,7 @@ Este proyecto es una aplicación de escritorio desarrollada en C++ con el framew
 
 ## 📸 Captura de Pantalla
 *(Aquí puedes poner una imagen de tu programa funcionando. Sube una captura a GitHub y pega el enlace aquí)*
-![Screenshot del programa](URL_DE_TU_IMAGEN_AQUI)
+![Screenshot del programa](Funcionando.png)
 
 ## ✨ Características
 - **Visualización Gráfica**: Dibuja el grafo en pantalla, mostrando nodos, aristas y sus pesos.
