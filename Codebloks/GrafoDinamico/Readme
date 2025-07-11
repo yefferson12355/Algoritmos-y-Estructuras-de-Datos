@@ -1,3 +1,6 @@
+
+#El funcionamiento esta ahi en la imagen , funcionando.png
+
 # Grafo Dinámico con C++/Qt
 
 Este proyecto es una aplicación de escritorio desarrollada en C++ con el framework Qt 6 que permite visualizar un grafo, crear sus nodos y aristas dinámicamente, y calcular la ruta más corta entre dos puntos utilizando el algoritmo de Dijkstra.
