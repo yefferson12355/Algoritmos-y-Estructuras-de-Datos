@@ -1,6 +1,6 @@
 # Ignorar carpetas de configuración de editores
 .idea/
-.vscode/
+
 
 # Ignorar carpetas de compilación en cualquier lugar del proyecto
 **/bin
@@ -12,3 +12,5 @@
 *.layout
 # Ignorar archivos PDF
 *.pdf
+# Ignorar carpetas de compilación
+**/build/

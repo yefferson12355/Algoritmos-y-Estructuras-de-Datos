@@ -1,0 +1,57 @@
+# Grafo Dinámico con C++/Qt
+
+Este proyecto es una aplicación de escritorio desarrollada en C++ con el framework Qt 6 que permite visualizar un grafo, crear sus nodos y aristas dinámicamente, y calcular la ruta más corta entre dos puntos utilizando el algoritmo de Dijkstra.
+
+## 📸 Captura de Pantalla
+*(Aquí puedes poner una imagen de tu programa funcionando. Sube una captura a GitHub y pega el enlace aquí)*
+![Screenshot del programa](URL_DE_TU_IMAGEN_AQUI)
+
+## ✨ Características
+- **Visualización Gráfica**: Dibuja el grafo en pantalla, mostrando nodos, aristas y sus pesos.
+- **Creación Dinámica**: Permite definir la estructura del grafo mediante una entrada de texto.
+- **Algoritmo de Dijkstra**: Calcula y resalta la ruta más corta entre un nodo de inicio y uno de fin.
+- **Interfaz Intuitiva**: Controles sencillos para crear el grafo y solicitar el cálculo de la ruta.
+
+## ⚙️ Requisitos
+Para compilar y ejecutar este proyecto desde el código fuente, necesitas tener instalado lo siguiente:
+
+1.  **Compilador de C++**: Se recomienda **Visual Studio 2022** (con la carga de trabajo "Desarrollo para el escritorio con C++").
+2.  **CMake**: Versión 3.16 o superior.
+3.  **Git**: Para clonar el repositorio.
+4.  **vcpkg**: El gestor de paquetes de C++ de Microsoft.
+
+## 🛠️ Instrucciones de Compilación y Ejecución
+Sigue estos pasos para poner en marcha el proyecto en un entorno de desarrollo como Visual Studio Code.
+
+**1. Clonar el repositorio**
+```bash
+git clone [https://github.com/yefferson12355/Algoritmos-y-Estructuras-de-Datos.git](https://github.com/yefferson12355/Algoritmos-y-Estructuras-de-Datos.git)
+cd Algoritmos-y-Estructuras-de-Datos/Codebloks/GrafoDinamico
+```
+
+**2. Instalar dependencias con vcpkg**
+Abre una terminal, navega a tu carpeta de `vcpkg` y ejecuta el siguiente comando para instalar Qt 6.
+```bash
+./vcpkg install qtbase:x64-windows
+```
+
+**3. Configurar el proyecto con CMake (usando VS Code)**
+1.  Abre la carpeta del proyecto (`GrafoDinamico`) en Visual Studio Code.
+2.  Abre la Paleta de Comandos (`Ctrl + Shift + P`) y selecciona `CMake: Select a Kit`. Elige el kit de **Visual Studio 2022 - amd64**.
+3.  Abre la Paleta de Comandos de nuevo y selecciona `CMake: Edit User-Local CMake Kits`. Modifica el kit que elegiste para añadir la siguiente línea, apuntando a tu instalación de vcpkg:
+    ```json
+    "toolchainFile": "C:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake"
+    ```
+4.  Finalmente, abre la Paleta de Comandos y ejecuta `CMake: Configure`. El proyecto debería configurarse sin errores.
+
+**4. Compilar (Build)**
+- En la barra de estado azul de VS Code, haz clic en el botón **`Build`**.
+
+**5. Ejecutar (Run)**
+- Una vez compilado, ve al panel de **"Run and Debug" (🐞)**.
+- Selecciona el objetivo de lanzamiento (ej: `[Default] GrafoDinamico_Qt.exe`).
+- Haz clic en el **botón verde de Play (▶️)** para lanzar la aplicación.
+
+## 💻 Uso
+- **Crear Grafo**: En el área de texto superior, ingresa las aristas en el formato `Nodo1 Nodo2 Peso` (una por línea) y presiona "Crear Grafo".
+- **Buscar Ruta**: Ingresa el nombre del nodo de inicio y de fin en sus respectivos campos y presiona "Buscar Ruta". El resultado se mostrará en el área de texto y la ruta se resaltará en rojo en el grafo.
