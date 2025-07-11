@@ -1,0 +1,14 @@
+# Ignorar carpetas de configuración de editores
+.idea/
+.vscode/
+
+# Ignorar carpetas de compilación en cualquier lugar del proyecto
+**/bin
+**/obj
+
+# Ignorar otros archivos generados por Code::Blocks
+*.cbp
+*.depend
+*.layout
+# Ignorar archivos PDF
+*.pdf
