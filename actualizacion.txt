@@ -1,0 +1,4 @@
+Puno,Ratata,12
+Ciudad Prueba,Cusco,700
+Ciudad Prueba2,Pun,500
+Pun,Puno,500
