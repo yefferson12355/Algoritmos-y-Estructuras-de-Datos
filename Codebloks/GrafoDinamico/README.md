@@ -3,7 +3,7 @@
 Este proyecto es una aplicación de escritorio desarrollada en C++ con el framework Qt 6 para visualizar grafos. Permite crear nodos y aristas dinámicamente, y calcula la ruta más corta entre dos puntos utilizando el algoritmo de Dijkstra.
 
 ## 📸 Captura de Pantalla
-![Screenshot del programa](funcionando.png)
+![Screenshot del programa](Funcionando.png)
 
 ## ✨ Características
 - **Visualización Gráfica**: Dibuja el grafo en pantalla, mostrando nodos, aristas y sus pesos correspondientes.
